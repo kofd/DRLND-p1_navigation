@@ -8,21 +8,21 @@ class BananaModel(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(state_size, 128)
         self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 128)
-        self.fc_state = nn.Linear(128, 1)
-        self.fc_action = nn.Linear(128, action_size)
+        self.fc_V1 = nn.Linear(128, 128)
+        self.fc_V2 = nn.Linear(128, 1)
+        self.fc_A1 = nn.Linear(128, 128)
+        self.fc_A2 = nn.Linear(128, action_size)
 
     def forward(self, state):
-        X = self.fc1(state)
-        X = F.elu(X)
-        state = self.fc2(X)
-        state = F.elu(state)
-        state = self.fc_state(state)
-        action = self.fc3(X)
-        action = F.elu(action)
-        action = self.fc_action(action)
-        action = action / action.mean(-1, keepdim=True)
-        return state + action
+        X = F.relu(self.fc1(state))
+        #X = F.relu(self.fc2(X))
+        A = F.relu(self.fc_A1(X))
+        return self.fc_A2(A)
+        A = self.fc_A2(A)
+        A /= A.mean(-1, keepdim=True)
+        V = F.relu(self.fc_V1(X))
+        V = self.fc_V2(V)
+        return V + A
 
 
 class BananaPixelsModel(nn.Module):
